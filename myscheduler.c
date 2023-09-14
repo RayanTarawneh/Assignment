@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <unistd.h>
 
 //  you may need other standard header files
@@ -90,14 +91,13 @@ int read_sysconfig(char argv0[], char filename[])
 
             printf("%s %d %d \n" , Devices[device].devicename, Devices[device].readspeed, Devices[device].writespeed);
             printf("%d \n",device);
-            device++;
+        device++;
         int timequantum = DEFAULT_TIME_QUANTUM;
-        sscanf(line, "timequantum %dusec", &timequantum);
     printf("%d\n", timequantum);
 
         }
     return 0;
-}   
+}
 
 
 int read_commands(char argv0[], char filename[])
@@ -109,22 +109,37 @@ int read_commands(char argv0[], char filename[])
     
     char line[1000];
     int command = -1;
+    int time = 0;
+    int leave = 0;
+    char status[50];
 
     while(fgets(line, sizeof(line), commandsfile) != NULL && (command < MAX_COMMANDS)) {
 
-        if(line[0] == CHAR_COMMENT){
+        if(line[0] == CHAR_COMMENT || leave == 0){
+            command++;
+            printf("%d \n", command);
+            printf("character comment hit \n");
+            printf("%s", line);
+            leave = 1;
             continue;
         }
-        command++;
-        sscanf(line, "%s", Commands[command].commandname);
-        continue;   
-
-        while(line[0] != CHAR_COMMENT){
         
-            printf("%s \n" , Commands[command].commandname);
-            printf("%d \n", command);
+
+        
+        sscanf(line, "%s", Commands[command].commandname);  
+        //printf("%s \n", Commands[command].commandname);
+
+        while(fgets(line, sizeof(line), commandsfile) != NULL && line[0] != CHAR_COMMENT){
+            sscanf(line, "%dusecs %s \n", &time, status );
+            printf("the status is %s \n" , status);
+            //printf("start line \n %s \n endline \n", line);
+            
+            if(strcmp(status, "exit") == 0){
+                leave = 0;
+            }
+            continue;
         }
-    
+    }
     return 0;
 }
 
@@ -158,7 +173,7 @@ int main(int argc, char *argv[])
     printf("measurements  %i  %i\n", 0, 0);
 
 
-    printf("%d hello\n", Devices[0].readspeed);
+    // printf("%d hello\n", Devices[0].readspeed);
     exit(EXIT_SUCCESS);
 }
 
