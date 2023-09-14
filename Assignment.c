@@ -1,10 +1,12 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <unistd.h>
+
 //  you may need other standard header files
 
 
 //  CITS2002 Project 1 2023
-//  Student1:   23941353   Rayan Tarawneh
+//  Student1:   STUDENT-NUMBER1   NAME-1
 //  Student2:   STUDENT-NUMBER2   NAME-2
 
 
@@ -34,14 +36,60 @@
 #define TIME_CORE_STATE_TRANSITIONS     10
 #define TIME_ACQUIRE_BUS                20
 
-
+//variables
 //  ----------------------------------------------------------------------
 
 #define CHAR_COMMENT                    '#'
 
-void read_sysconfig(char argv0[], char filename[])
+struct {
+    char devicename[100];
+    int readspeed;
+    int writespeed;
+    
+        
+} Devices[MAX_DEVICES];
+
+int read_sysconfig(char argv0[], char filename[])
 {
-}
+
+
+    FILE *sysconfigfile = fopen(filename, "r");
+    if(sysconfigfile == NULL){
+        return(EXIT_FAILURE);
+    }
+
+    char line[1000];
+    int device = 0;
+
+    
+
+
+    while(fgets(line, sizeof(line), sysconfigfile) != NULL && (device < MAX_DEVICES)) {
+
+        if(line[0] == CHAR_COMMENT || line[0] == '\n'){
+            continue;
+        }
+
+        sscanf(line, "device %s %dBps %dBps", 
+            Devices[device].devicename, 
+            &Devices[device].readspeed,
+            &Devices[device].writespeed);
+
+            printf("%s %d %d \n" , Devices[device].devicename, Devices[device].readspeed, Devices[device].writespeed);
+            printf("%d \n",device);
+            device++;
+        int timequantum = DEFAULT_TIME_QUANTUM;
+        sscanf(line, "timequantum %dusec", &timequantum);
+    //printf("%d\n", timequantum);
+
+
+            
+
+        }
+    return 0;
+}   
+
+
 
 void read_commands(char argv0[], char filename[])
 {
@@ -57,6 +105,7 @@ void execute_commands(void)
 
 int main(int argc, char *argv[])
 {
+
 //  ENSURE THAT WE HAVE THE CORRECT NUMBER OF COMMAND-LINE ARGUMENTS
     if(argc != 3) {
         printf("Usage: %s sysconfig-file command-file\n", argv[0]);
@@ -75,13 +124,9 @@ int main(int argc, char *argv[])
 //  PRINT THE PROGRAM'S RESULTS
     printf("measurements  %i  %i\n", 0, 0);
 
+
+    printf("%d hello\n", Devices[0].readspeed);
     exit(EXIT_SUCCESS);
 }
 
 //  vim: ts=8 sw=4
-
-
-
-
-
-// This is what we're meant to work on apparently
