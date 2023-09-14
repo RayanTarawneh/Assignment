@@ -49,6 +49,19 @@ struct {
         
 } Devices[MAX_DEVICES];
 
+struct{
+
+}commandinstruct;
+
+struct {
+    char commandname[MAX_COMMAND_NAME + 1];
+
+    struct{
+
+    }commandinstruct;
+
+} Commands[MAX_COMMANDS];
+
 int read_sysconfig(char argv0[], char filename[])
 {
 
@@ -80,19 +93,39 @@ int read_sysconfig(char argv0[], char filename[])
             device++;
         int timequantum = DEFAULT_TIME_QUANTUM;
         sscanf(line, "timequantum %dusec", &timequantum);
-    //printf("%d\n", timequantum);
-
-
-            
+    printf("%d\n", timequantum);
 
         }
     return 0;
 }   
 
 
-
-void read_commands(char argv0[], char filename[])
+int read_commands(char argv0[], char filename[])
 {
+    FILE *commandsfile = fopen(filename, "r");
+    if(commandsfile == NULL){
+        return(EXIT_FAILURE);
+    }
+    
+    char line[1000];
+    int command = -1;
+
+    while(fgets(line, sizeof(line), commandsfile) != NULL && (command < MAX_COMMANDS)) {
+
+        if(line[0] == CHAR_COMMENT){
+            continue;
+        }
+        command++;
+        sscanf(line, "%s", Commands[command].commandname);
+        continue;   
+
+        while(line[0] != CHAR_COMMENT){
+        
+            printf("%s \n" , Commands[command].commandname);
+            printf("%d \n", command);
+        }
+    
+    return 0;
 }
 
 //  ----------------------------------------------------------------------
