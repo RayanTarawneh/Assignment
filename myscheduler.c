@@ -89,11 +89,10 @@ int read_sysconfig(char argv0[], char filename[])
             &Devices[device].readspeed,
             &Devices[device].writespeed);
 
-            printf("%s %d %d \n" , Devices[device].devicename, Devices[device].readspeed, Devices[device].writespeed);
-            printf("%d \n",device);
+            // printf("%s %d %d \n" , Devices[device].devicename, Devices[device].readspeed, Devices[device].writespeed);
+            // printf("%d \n",device);
         device++;
-        int timequantum = DEFAULT_TIME_QUANTUM;
-    printf("%d\n", timequantum);
+        //int timequantum = DEFAULT_TIME_QUANTUM;
 
         }
     return 0;
@@ -102,6 +101,11 @@ int read_sysconfig(char argv0[], char filename[])
 
 int read_commands(char argv0[], char filename[])
 {
+    // int readyqueue[];
+    // int running;
+    // int blockedqueue[];
+    // int waiting[];
+
     FILE *commandsfile = fopen(filename, "r");
     if(commandsfile == NULL){
         return(EXIT_FAILURE);
@@ -111,34 +115,66 @@ int read_commands(char argv0[], char filename[])
     int command = -1;
     int time = 0;
     int leave = 0;
+    int bytes = 0;
+    char devicetype[MAX_DEVICE_NAME +1];
     char status[50];
 
     while(fgets(line, sizeof(line), commandsfile) != NULL && (command < MAX_COMMANDS)) {
 
+        if(line[0] == CHAR_COMMENT){
+            continue;
+        }
+        
         if(line[0] == CHAR_COMMENT || leave == 0){
+            
+            leave = 1;
             command++;
             printf("%d \n", command);
-            printf("character comment hit \n");
-            printf("%s", line);
-            leave = 1;
-            continue;
+            sscanf(line, "%s", Commands[command].commandname);  
+            printf("%s \n", Commands[command].commandname);
         }
         
 
-        
-        sscanf(line, "%s", Commands[command].commandname);  
-        //printf("%s \n", Commands[command].commandname);
-
-        while(fgets(line, sizeof(line), commandsfile) != NULL && line[0] != CHAR_COMMENT){
+        while(fgets(line, sizeof(line), commandsfile) != NULL && leave == 1){
             sscanf(line, "%dusecs %s \n", &time, status );
-            printf("the status is %s \n" , status);
-            //printf("start line \n %s \n endline \n", line);
             
-            if(strcmp(status, "exit") == 0){
-                leave = 0;
+            if(strcmp(status, "sleep") == 0){
+                printf("sleep \n");
+                continue;
             }
+
+            if(strcmp(status, "read") == 0){
+                sscanf(line, "%dusecs %s %s %dB \n", &time, status, devicetype, &bytes);
+                printf("read \n");
+            }
+
+            if(strcmp(status, "write") == 0){
+                sscanf(line, "%dusecs %s %s %dB \n", &time, status, devicetype, &bytes);
+                printf("write \n");
+            }
+
+            if(strcmp(status, "wait") == 0){
+                printf("wait \n");
+                continue;
+            }
+
+            if(strcmp(status, "spawn") == 0){
+                printf("spawn \n");
+                continue;
+            }
+
+            if(strcmp(status, "exit") == 0){
+                printf("exit \n");
+                leave = 0;
+                continue;
+            }
+
+            // printf("this is the value of leave %d \n", leave);
+
+            sscanf(line, "%dusecs %s \n", &time, status );
             continue;
         }
+        // printf("this is the number of command %d \n", command);
     }
     return 0;
 }
@@ -171,9 +207,7 @@ int main(int argc, char *argv[])
 
 //  PRINT THE PROGRAM'S RESULTS
     printf("measurements  %i  %i\n", 0, 0);
-
-
-    // printf("%d hello\n", Devices[0].readspeed);
+    
     exit(EXIT_SUCCESS);
 }
 
