@@ -50,22 +50,26 @@ struct {
         
 } Devices[MAX_DEVICES];
 
-struct  {
+// Declaring the inner struct
+struct Inner_Status_Info;
+
+struct Outer_Command_Info{
+    char commandname[MAX_COMMAND_NAME + 1];
+    struct Inner_Status_Info *inner;
+    
+
+
+};
+
+struct Inner_Status_Info{
+    
     int usecduration;
     char status[5];
     char devicename[MAX_DEVICE_NAME + 1];
     int sleeplength;
     int readwritespeed;
 
-} Inner_Status_Info;
-
-struct {
-    char commandname[MAX_COMMAND_NAME + 1];
-    struct Inner_Status_Info inner;
-    
-
-
-} Outer_Command_Info;
+};
 
 int read_sysconfig(char argv0[], char filename[])
 {
